@@ -102,7 +102,8 @@ export const VocabularyPage: React.FC<VocabularyPageProps> = ({
         n.german.toLowerCase().includes(q) ||
         n.english.toLowerCase().includes(q) ||
         n.plural.toLowerCase().includes(q) ||
-        n.article.toLowerCase().includes(q)
+        n.article.toLowerCase().includes(q) ||
+        (n.example && n.example.toLowerCase().includes(q))
       );
     });
   }, [nouns, searchQuery, articleFilter]);
@@ -115,7 +116,8 @@ export const VocabularyPage: React.FC<VocabularyPageProps> = ({
       (v) =>
         v.german.toLowerCase().includes(q) ||
         v.english.toLowerCase().includes(q) ||
-        (v.conjugation && v.conjugation.toLowerCase().includes(q))
+        (v.conjugation && v.conjugation.toLowerCase().includes(q)) ||
+        (v.example && v.example.toLowerCase().includes(q))
     );
   }, [verbs, searchQuery]);
 
@@ -127,7 +129,8 @@ export const VocabularyPage: React.FC<VocabularyPageProps> = ({
       (a) =>
         a.german.toLowerCase().includes(q) ||
         a.english.toLowerCase().includes(q) ||
-        (a.comparative && a.comparative.toLowerCase().includes(q))
+        (a.comparative && a.comparative.toLowerCase().includes(q)) ||
+        (a.example && a.example.toLowerCase().includes(q))
     );
   }, [adjectives, searchQuery]);
 
@@ -217,7 +220,7 @@ export const VocabularyPage: React.FC<VocabularyPageProps> = ({
   const deleteInfo = getDeleteModalInfo();
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-5 sm:space-y-8 animate-fade-in">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -232,10 +235,10 @@ export const VocabularyPage: React.FC<VocabularyPageProps> = ({
         </div>
 
         {/* Quick Add Menu */}
-        <div className="relative shrink-0" ref={addMenuRef}>
+        <div className="relative w-full sm:w-auto shrink-0" ref={addMenuRef}>
           <button
             onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-sm transition-all shadow-xs hover:shadow-md cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-sm transition-all shadow-xs hover:shadow-md cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Add New Entry</span>
@@ -243,7 +246,7 @@ export const VocabularyPage: React.FC<VocabularyPageProps> = ({
           </button>
 
           {isAddMenuOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-30 animate-fade-in">
+            <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-full sm:w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-30 animate-fade-in">
               <button
                 onClick={() => {
                   setIsAddMenuOpen(false);
@@ -334,14 +337,14 @@ export const VocabularyPage: React.FC<VocabularyPageProps> = ({
         {/* Search Input & Article Filter (when viewing nouns or all) */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 flex-1">
           {(typeFilter === 'all' || typeFilter === 'noun') && (
-            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200 self-start sm:self-auto shrink-0">
+            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200 w-full sm:w-auto shrink-0">
               {(['all', 'der', 'die', 'das'] as const).map((art) => {
                 const isActive = articleFilter === art;
                 return (
                   <button
                     key={art}
                     onClick={() => setArticleFilter(art)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${
+                    className={`flex-1 sm:flex-none px-2.5 py-1.5 sm:py-1 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${
                       isActive
                         ? 'bg-zinc-900 text-white shadow-xs'
                         : 'text-slate-600 hover:text-slate-900'
@@ -401,153 +404,280 @@ export const VocabularyPage: React.FC<VocabularyPageProps> = ({
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs divide-y divide-slate-100">
-          {/* Header Row */}
-          <div className="grid grid-cols-[84px_minmax(0,1fr)_minmax(0,1fr)] sm:grid-cols-[96px_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 sm:gap-4 px-3.5 sm:px-5 py-2.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">
-            <span>Type</span>
-            <span>German</span>
-            <span>English</span>
-          </div>
+        <div
+          role="region"
+          aria-label="German vocabulary list"
+          className="@container bg-white rounded-2xl border border-slate-200 overflow-clip shadow-xs"
+        >
+          <table className="w-full table-fixed border-separate border-spacing-0 text-left">
+            <caption className="sr-only">German Word Bank vocabulary entries</caption>
+            <thead>
+              <tr className="bg-slate-50 text-[10px] @[600px]:text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">
+                <th
+                  scope="col"
+                  className="w-[54px] @[600px]:w-[116px] py-2.5 pl-2.5 pr-1.5 @[600px]:pl-5 @[600px]:pr-3 border-b border-slate-200 font-bold"
+                >
+                  Type
+                </th>
+                <th
+                  scope="col"
+                  className="py-2.5 px-2 @[600px]:px-3 border-b border-slate-200 font-bold"
+                >
+                  German
+                </th>
+                <th
+                  scope="col"
+                  className="w-[36%] @[600px]:w-[38%] py-2.5 pl-2 pr-2.5 @[600px]:pl-3 @[600px]:pr-5 border-b border-slate-200 font-bold"
+                >
+                  English
+                </th>
+              </tr>
+            </thead>
+            {/* Nouns */}
+            {(typeFilter === 'all' || typeFilter === 'noun') &&
+              filteredNouns.map((noun) => {
+                const hasExample = Boolean(noun.example?.trim());
+                const rowPadBottom = hasExample ? 'pb-1.5 @[600px]:pb-2' : 'pb-3 @[600px]:pb-3.5';
+                return (
+                  <tbody
+                    key={noun.id}
+                    onClick={() => setActionTarget({ type: 'noun', item: noun })}
+                    className="group cursor-pointer select-none [&_tr:last-child_td]:border-b [&_tr:last-child_td]:border-slate-100 last:[&_tr:last-child_td]:border-b-0"
+                  >
+                    <tr
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setActionTarget({ type: 'noun', item: noun });
+                        }
+                      }}
+                      className="focus-visible:outline-2 focus-visible:outline-red-500 focus-visible:-outline-offset-2"
+                    >
+                      <td className={`align-top pt-3 ${rowPadBottom} pl-2.5 pr-1.5 @[600px]:pt-3.5 @[600px]:pl-5 @[600px]:pr-3 group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors`}>
+                        <span
+                          title="Noun"
+                          className="mt-0.5 block w-full text-center px-1 @[600px]:px-1.5 py-0.5 rounded-md text-[9px] @[600px]:text-[11px] font-bold uppercase tracking-tight @[600px]:tracking-wider bg-red-50 text-red-700 border border-red-200"
+                        >
+                          Noun
+                        </span>
+                      </td>
+                      <td className={`align-top pt-3 ${rowPadBottom} px-2 @[600px]:pt-3.5 @[600px]:px-3 group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors`}>
+                        <div className="min-w-0 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                          <span className="font-bold text-slate-900 text-sm @[600px]:text-base leading-snug break-words">
+                            {noun.article} {noun.german}
+                          </span>
+                          {noun.plural && (
+                            <span className="min-w-0 text-xs text-slate-500 font-medium leading-snug break-words">
+                              die {noun.plural}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className={`align-top pt-3 ${rowPadBottom} pl-2 pr-2.5 @[600px]:pt-3.5 @[600px]:pl-3 @[600px]:pr-5 font-bold text-slate-900 text-sm @[600px]:text-base leading-snug break-words group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors`}>
+                        {noun.english}
+                      </td>
+                    </tr>
+                    {hasExample && (
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="pt-0 pb-3 px-2.5 @[600px]:pb-3.5 @[600px]:pl-[128px] @[600px]:pr-5 group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors"
+                        >
+                          <div className="flex items-baseline gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50/90 group-hover:bg-white/90 border-l-2 border-red-300 text-xs @[600px]:text-[13px] leading-relaxed break-words transition-colors">
+                            <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              Ex.
+                            </span>
+                            <span className="min-w-0 italic text-slate-600">{noun.example}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                );
+              })}
 
-          {/* Nouns */}
-          {(typeFilter === 'all' || typeFilter === 'noun') &&
-            filteredNouns.map((noun) => (
-              <div
-                key={noun.id}
-                onClick={() => setActionTarget({ type: 'noun', item: noun })}
-                className="grid grid-cols-[84px_minmax(0,1fr)_minmax(0,1fr)] sm:grid-cols-[96px_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 sm:gap-4 p-3.5 sm:px-5 hover:bg-slate-50/80 active:bg-slate-100 transition-colors cursor-pointer select-none group"
-              >
-                <div className="shrink-0">
-                  <span className="w-full text-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200 block truncate">
-                    Noun
-                  </span>
-                </div>
-                <div
-                  className="min-w-0 truncate"
-                  title={`${noun.article} ${noun.german} · die ${noun.plural}`}
-                >
-                  <span className="font-bold text-slate-900 text-sm sm:text-base">
-                    {noun.article} {noun.german}
-                  </span>
-                  <span className="ml-2 text-xs text-slate-500 font-medium">
-                    die {noun.plural}
-                  </span>
-                </div>
-                <div
-                  className="min-w-0 font-bold text-slate-900 text-sm sm:text-base truncate"
-                  title={noun.english}
-                >
-                  {noun.english}
-                </div>
-              </div>
-            ))}
+            {/* Verbs */}
+            {(typeFilter === 'all' || typeFilter === 'verb') &&
+              filteredVerbs.map((verb) => {
+                const hasExample = Boolean(verb.example?.trim());
+                const rowPadBottom = hasExample ? 'pb-1.5 @[600px]:pb-2' : 'pb-3 @[600px]:pb-3.5';
+                return (
+                  <tbody
+                    key={verb.id}
+                    onClick={() => setActionTarget({ type: 'verb', item: verb })}
+                    className="group cursor-pointer select-none [&_tr:last-child_td]:border-b [&_tr:last-child_td]:border-slate-100 last:[&_tr:last-child_td]:border-b-0"
+                  >
+                    <tr
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setActionTarget({ type: 'verb', item: verb });
+                        }
+                      }}
+                      className="focus-visible:outline-2 focus-visible:outline-red-500 focus-visible:-outline-offset-2"
+                    >
+                      <td className={`align-top pt-3 ${rowPadBottom} pl-2.5 pr-1.5 @[600px]:pt-3.5 @[600px]:pl-5 @[600px]:pr-3 group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors`}>
+                        <span
+                          title="Verb"
+                          className="mt-0.5 block w-full text-center px-1 @[600px]:px-1.5 py-0.5 rounded-md text-[9px] @[600px]:text-[11px] font-bold uppercase tracking-tight @[600px]:tracking-wider bg-amber-50 text-amber-800 border border-amber-200"
+                        >
+                          Verb
+                        </span>
+                      </td>
+                      <td className={`align-top pt-3 ${rowPadBottom} px-2 @[600px]:pt-3.5 @[600px]:px-3 group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors`}>
+                        <div className="min-w-0 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                          <span className="font-bold text-slate-900 text-sm @[600px]:text-base leading-snug break-words">
+                            {verb.german}
+                          </span>
+                          {verb.conjugation ? (
+                            <span className="min-w-0 max-w-full text-[11px] @[600px]:text-xs font-mono text-amber-900 bg-amber-50/80 px-1.5 py-0.5 rounded border border-amber-100 leading-snug break-words">
+                              {verb.conjugation}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-slate-400 italic leading-snug">
+                              Infinitive
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className={`align-top pt-3 ${rowPadBottom} pl-2 pr-2.5 @[600px]:pt-3.5 @[600px]:pl-3 @[600px]:pr-5 font-bold text-slate-900 text-sm @[600px]:text-base leading-snug break-words group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors`}>
+                        {verb.english}
+                      </td>
+                    </tr>
+                    {hasExample && (
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="pt-0 pb-3 px-2.5 @[600px]:pb-3.5 @[600px]:pl-[128px] @[600px]:pr-5 group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors"
+                        >
+                          <div className="flex items-baseline gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50/90 group-hover:bg-white/90 border-l-2 border-amber-300 text-xs @[600px]:text-[13px] leading-relaxed break-words transition-colors">
+                            <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              Ex.
+                            </span>
+                            <span className="min-w-0 italic text-slate-600">{verb.example}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                );
+              })}
 
-          {/* Verbs */}
-          {(typeFilter === 'all' || typeFilter === 'verb') &&
-            filteredVerbs.map((verb) => (
-              <div
-                key={verb.id}
-                onClick={() => setActionTarget({ type: 'verb', item: verb })}
-                className="grid grid-cols-[84px_minmax(0,1fr)_minmax(0,1fr)] sm:grid-cols-[96px_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 sm:gap-4 p-3.5 sm:px-5 hover:bg-slate-50/80 active:bg-slate-100 transition-colors cursor-pointer select-none group"
-              >
-                <div className="shrink-0">
-                  <span className="w-full text-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 block truncate">
-                    Verb
-                  </span>
-                </div>
-                <div
-                  className="min-w-0 truncate"
-                  title={verb.conjugation ? `${verb.german} (${verb.conjugation})` : verb.german}
-                >
-                  <span className="font-bold text-slate-900 text-sm sm:text-base">
-                    {verb.german}
-                  </span>
-                  {verb.conjugation ? (
-                    <span className="ml-2 text-xs font-mono text-amber-900 bg-amber-50/80 px-1.5 py-0.5 rounded border border-amber-100">
-                      {verb.conjugation}
-                    </span>
-                  ) : (
-                    <span className="ml-2 text-xs text-slate-400 italic">Infinitive</span>
-                  )}
-                </div>
-                <div
-                  className="min-w-0 font-bold text-slate-900 text-sm sm:text-base truncate"
-                  title={verb.english}
-                >
-                  {verb.english}
-                </div>
-              </div>
-            ))}
+            {/* Adjectives */}
+            {(typeFilter === 'all' || typeFilter === 'adjective') &&
+              filteredAdjectives.map((adj) => {
+                const hasExample = Boolean(adj.example?.trim());
+                const rowPadBottom = hasExample ? 'pb-1.5 @[600px]:pb-2' : 'pb-3 @[600px]:pb-3.5';
+                return (
+                  <tbody
+                    key={adj.id}
+                    onClick={() => setActionTarget({ type: 'adjective', item: adj })}
+                    className="group cursor-pointer select-none [&_tr:last-child_td]:border-b [&_tr:last-child_td]:border-slate-100 last:[&_tr:last-child_td]:border-b-0"
+                  >
+                    <tr
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setActionTarget({ type: 'adjective', item: adj });
+                        }
+                      }}
+                      className="focus-visible:outline-2 focus-visible:outline-red-500 focus-visible:-outline-offset-2"
+                    >
+                      <td className={`align-top pt-3 ${rowPadBottom} pl-2.5 pr-1.5 @[600px]:pt-3.5 @[600px]:pl-5 @[600px]:pr-3 group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors`}>
+                        <span
+                          title="Adjective"
+                          aria-label="Adjective"
+                          className="mt-0.5 block w-full text-center px-1 @[600px]:px-1.5 py-0.5 rounded-md text-[9px] @[600px]:text-[11px] font-bold uppercase tracking-tight @[600px]:tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        >
+                          <span className="@[600px]:hidden" aria-hidden="true">Adj</span>
+                          <span className="hidden @[600px]:inline">Adjective</span>
+                        </span>
+                      </td>
+                      <td className={`align-top pt-3 ${rowPadBottom} px-2 @[600px]:pt-3.5 @[600px]:px-3 group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors`}>
+                        <div className="min-w-0 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                          <span className="font-bold text-slate-900 text-sm @[600px]:text-base leading-snug break-words">
+                            {adj.german}
+                          </span>
+                          {adj.comparative && (
+                            <span className="min-w-0 max-w-full text-[11px] @[600px]:text-xs font-mono text-emerald-900 bg-emerald-50/80 px-1.5 py-0.5 rounded border border-emerald-200 leading-snug break-words">
+                              {adj.comparative}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className={`align-top pt-3 ${rowPadBottom} pl-2 pr-2.5 @[600px]:pt-3.5 @[600px]:pl-3 @[600px]:pr-5 font-bold text-slate-900 text-sm @[600px]:text-base leading-snug break-words group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors`}>
+                        {adj.english}
+                      </td>
+                    </tr>
+                    {hasExample && (
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="pt-0 pb-3 px-2.5 @[600px]:pb-3.5 @[600px]:pl-[128px] @[600px]:pr-5 group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors"
+                        >
+                          <div className="flex items-baseline gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50/90 group-hover:bg-white/90 border-l-2 border-emerald-300 text-xs @[600px]:text-[13px] leading-relaxed break-words transition-colors">
+                            <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              Ex.
+                            </span>
+                            <span className="min-w-0 italic text-slate-600">{adj.example}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                );
+              })}
 
-          {/* Adjectives */}
-          {(typeFilter === 'all' || typeFilter === 'adjective') &&
-            filteredAdjectives.map((adj) => (
-              <div
-                key={adj.id}
-                onClick={() => setActionTarget({ type: 'adjective', item: adj })}
-                className="grid grid-cols-[84px_minmax(0,1fr)_minmax(0,1fr)] sm:grid-cols-[96px_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 sm:gap-4 p-3.5 sm:px-5 hover:bg-slate-50/80 active:bg-slate-100 transition-colors cursor-pointer select-none group"
-              >
-                <div className="shrink-0">
-                  <span className="w-full text-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 block truncate">
-                    Adjective
-                  </span>
-                </div>
-                <div
-                  className="min-w-0 truncate"
-                  title={adj.comparative ? `${adj.german} (${adj.comparative})` : adj.german}
+            {/* Sentences */}
+            {(typeFilter === 'all' || typeFilter === 'sentence') &&
+              filteredSentences.map((sentence) => (
+                <tbody
+                  key={sentence.id}
+                  onClick={() => setActionTarget({ type: 'sentence', item: sentence })}
+                  className="group cursor-pointer select-none [&_tr:last-child_td]:border-b [&_tr:last-child_td]:border-slate-100 last:[&_tr:last-child_td]:border-b-0"
                 >
-                  <span className="font-bold text-slate-900 text-sm sm:text-base">
-                    {adj.german}
-                  </span>
-                  {adj.comparative && (
-                    <span className="ml-2 text-xs font-mono text-emerald-900 bg-emerald-50/80 px-1.5 py-0.5 rounded border border-emerald-200">
-                      {adj.comparative}
-                    </span>
-                  )}
-                </div>
-                <div
-                  className="min-w-0 font-bold text-slate-900 text-sm sm:text-base truncate"
-                  title={adj.english}
-                >
-                  {adj.english}
-                </div>
-              </div>
-            ))}
-
-          {/* Sentences */}
-          {(typeFilter === 'all' || typeFilter === 'sentence') &&
-            filteredSentences.map((sentence) => (
-              <div
-                key={sentence.id}
-                onClick={() => setActionTarget({ type: 'sentence', item: sentence })}
-                className="grid grid-cols-[84px_minmax(0,1fr)_minmax(0,1fr)] sm:grid-cols-[96px_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 sm:gap-4 p-3.5 sm:px-5 hover:bg-slate-50/80 active:bg-slate-100 transition-colors cursor-pointer select-none group"
-              >
-                <div className="shrink-0">
-                  <span className="w-full text-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-800 border border-zinc-200 block truncate">
-                    Sentence
-                  </span>
-                </div>
-                <div
-                  className="min-w-0 truncate"
-                  title={sentence.remark ? `${sentence.german} (${sentence.remark})` : sentence.german}
-                >
-                  <span className="font-bold text-slate-900 text-sm sm:text-base leading-snug">
-                    {sentence.german}
-                  </span>
-                  {sentence.remark && (
-                    <span className="ml-2 text-xs text-slate-500 font-normal">
-                      ({sentence.remark})
-                    </span>
-                  )}
-                </div>
-                <div
-                  className="min-w-0 font-bold text-slate-900 text-sm sm:text-base truncate"
-                  title={sentence.english}
-                >
-                  {sentence.english}
-                </div>
-              </div>
-            ))}
+                  <tr
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setActionTarget({ type: 'sentence', item: sentence });
+                      }
+                    }}
+                    className="focus-visible:outline-2 focus-visible:outline-red-500 focus-visible:-outline-offset-2"
+                  >
+                    <td className="align-top py-3 pl-2.5 pr-1.5 @[600px]:py-3.5 @[600px]:pl-5 @[600px]:pr-3 group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors">
+                      <span
+                        title="Sentence"
+                        aria-label="Sentence"
+                        className="mt-0.5 block w-full text-center px-1 @[600px]:px-1.5 py-0.5 rounded-md text-[9px] @[600px]:text-[11px] font-bold uppercase tracking-tight @[600px]:tracking-wider bg-zinc-100 text-zinc-800 border border-zinc-200"
+                      >
+                        <span className="@[600px]:hidden" aria-hidden="true">Sent</span>
+                        <span className="hidden @[600px]:inline">Sentence</span>
+                      </span>
+                    </td>
+                    <td className="align-top py-3 px-2 @[600px]:py-3.5 @[600px]:px-3 group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors">
+                      <div className="min-w-0 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                        <span className="font-bold text-slate-900 text-sm @[600px]:text-base leading-snug break-words">
+                          {sentence.german}
+                        </span>
+                        {sentence.remark && (
+                          <span className="min-w-0 text-xs text-slate-500 font-normal leading-snug break-words">
+                            ({sentence.remark})
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="align-top py-3 pl-2 pr-2.5 @[600px]:py-3.5 @[600px]:pl-3 @[600px]:pr-5 font-bold text-slate-900 text-sm @[600px]:text-base leading-snug break-words group-hover:bg-slate-50/80 group-active:bg-slate-100 transition-colors">
+                      {sentence.english}
+                    </td>
+                  </tr>
+                </tbody>
+              ))}
+          </table>
         </div>
       )}
 
@@ -624,6 +754,14 @@ export const VocabularyPage: React.FC<VocabularyPageProps> = ({
               <div className="font-bold text-slate-700 text-sm mt-1">
                 {actionTarget.item.english}
               </div>
+              {actionTarget.type !== 'sentence' && actionTarget.item.example && (
+                <div className="mt-2.5 pt-2 border-t border-slate-200/80 text-xs text-slate-600 italic leading-relaxed">
+                  <span className="not-italic font-bold uppercase tracking-wider text-[10px] text-slate-400 mr-1.5">
+                    Ex.
+                  </span>
+                  {actionTarget.item.example}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2.5 pt-2">

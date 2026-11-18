@@ -19,6 +19,7 @@ export const NounFormModal: React.FC<NounFormModalProps> = ({
   const [german, setGerman] = useState(initialNoun?.german || '');
   const [plural, setPlural] = useState(initialNoun?.plural || '');
   const [english, setEnglish] = useState(initialNoun?.english || '');
+  const [example, setExample] = useState(initialNoun?.example || '');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -42,6 +43,7 @@ export const NounFormModal: React.FC<NounFormModalProps> = ({
         german: german.trim(),
         plural: plural.trim(),
         english: english.trim(),
+        example: example.trim() || undefined,
       });
       onClose();
     } catch (err) {
@@ -145,6 +147,27 @@ export const NounFormModal: React.FC<NounFormModalProps> = ({
             className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600"
           />
           {errors.english && <p className="text-xs text-red-500 mt-1">{errors.english}</p>}
+        </div>
+
+        {/* Example Sentence */}
+        <div>
+          <label
+            htmlFor="noun-example"
+            className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"
+          >
+            German Example <span className="text-slate-400 font-normal">(Optional)</span>
+          </label>
+          <textarea
+            id="noun-example"
+            rows={2}
+            value={example}
+            onChange={(e) => setExample(e.target.value)}
+            placeholder="e.g. Der Apfel ist rot und süß."
+            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600"
+          />
+          <p className="text-xs text-slate-400 mt-1">
+            A short, simple German sentence using this noun.
+          </p>
         </div>
 
         {/* Action Buttons */}

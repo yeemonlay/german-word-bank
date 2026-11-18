@@ -10,23 +10,7 @@ export interface FirebaseConfigParams {
   appId?: string;
 }
 
-const STORAGE_KEY_FIREBASE_CONFIG = 'german_word_bank_firebase_config';
-const STORAGE_KEY_FIRESTORE_ENABLED = 'german_word_bank_firestore_enabled';
-
-// Read config from Vite environment or localStorage override
 export function getFirebaseConfig(): FirebaseConfigParams {
-  const localSaved = localStorage.getItem(STORAGE_KEY_FIREBASE_CONFIG);
-  if (localSaved) {
-    try {
-      const parsed = JSON.parse(localSaved);
-      if (parsed && typeof parsed === 'object' && parsed.apiKey) {
-        return parsed;
-      }
-    } catch {
-      // ignore
-    }
-  }
-
   return {
     apiKey: (import.meta.env.VITE_FIREBASE_API_KEY || '').trim(),
     authDomain: (import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '').trim(),
@@ -37,12 +21,7 @@ export function getFirebaseConfig(): FirebaseConfigParams {
   };
 }
 
-export function saveFirebaseConfig(config: FirebaseConfigParams): void {
-  localStorage.setItem(STORAGE_KEY_FIREBASE_CONFIG, JSON.stringify(config));
-}
-
-export function isFirebaseConfigured(): boolean {
-  const config = getFirebaseConfig();
+export function isFirebaseConfigured(config: FirebaseConfigParams = getFirebaseConfig()): boolean {
   const hasValidApiKey = Boolean(
     config.apiKey &&
       config.apiKey !== 'your_api_key_here' &&
@@ -57,66 +36,39 @@ export function isFirebaseConfigured(): boolean {
   return hasValidApiKey && hasValidProjectId;
 }
 
-export function isFirestoreEnabledByUser(): boolean {
-  const stored = localStorage.getItem(STORAGE_KEY_FIRESTORE_ENABLED);
-  if (stored !== null) {
-    return stored === 'true';
-  }
-  // Default to true if Firebase is configured via .env or localStorage!
-  return isFirebaseConfigured();
-}
-
-export function setFirestoreEnabledByUser(enabled: boolean): void {
-  localStorage.setItem(STORAGE_KEY_FIRESTORE_ENABLED, enabled ? 'true' : 'false');
-}
-
 let firebaseApp: FirebaseApp | null = null;
 let firestoreDb: Firestore | null = null;
-let lastFirestoreError: string | null = null;
 
-export function getLastFirestoreError(): string | null {
-  return lastFirestoreError;
-}
-
-export function setLastFirestoreError(err: string | null): void {
-  lastFirestoreError = err;
-}
-
-export function getFirestoreInstance(): Firestore | null {
+export function getFirestoreDb(): Firestore {
   if (firestoreDb) return firestoreDb;
 
   const config = getFirebaseConfig();
-  if (!config.apiKey || !config.projectId || !isFirebaseConfigured()) {
-    return null;
+  if (!config.apiKey || !config.projectId || !isFirebaseConfigured(config)) {
+    throw new Error(
+      'Firebase is not configured. Please set VITE_FIREBASE_API_KEY and VITE_FIREBASE_PROJECT_ID in .env.'
+    );
   }
 
-  try {
-    const cleanConfig: Record<string, string> = {
-      apiKey: config.apiKey,
-      projectId: config.projectId,
-    };
+  const cleanConfig: Record<string, string> = {
+    apiKey: config.apiKey,
+    projectId: config.projectId,
+  };
 
-    if (config.authDomain && !config.authDomain.includes('your_')) {
-      cleanConfig.authDomain = config.authDomain;
-    }
-    if (config.storageBucket && !config.storageBucket.includes('your_')) {
-      cleanConfig.storageBucket = config.storageBucket;
-    }
-    if (config.messagingSenderId && !config.messagingSenderId.includes('your_')) {
-      cleanConfig.messagingSenderId = config.messagingSenderId;
-    }
-    if (config.appId && !config.appId.includes('your_')) {
-      cleanConfig.appId = config.appId;
-    }
-
-    const existingApps = getApps();
-    firebaseApp = existingApps.length > 0 ? existingApps[0] : initializeApp(cleanConfig);
-    firestoreDb = getFirestore(firebaseApp);
-    return firestoreDb;
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.warn('Firebase initialization error:', err);
-    lastFirestoreError = message;
-    return null;
+  if (config.authDomain && !config.authDomain.includes('your_')) {
+    cleanConfig.authDomain = config.authDomain;
   }
+  if (config.storageBucket && !config.storageBucket.includes('your_')) {
+    cleanConfig.storageBucket = config.storageBucket;
+  }
+  if (config.messagingSenderId && !config.messagingSenderId.includes('your_')) {
+    cleanConfig.messagingSenderId = config.messagingSenderId;
+  }
+  if (config.appId && !config.appId.includes('your_')) {
+    cleanConfig.appId = config.appId;
+  }
+
+  const existingApps = getApps();
+  firebaseApp = existingApps.length > 0 ? existingApps[0] : initializeApp(cleanConfig);
+  firestoreDb = getFirestore(firebaseApp);
+  return firestoreDb;
 }

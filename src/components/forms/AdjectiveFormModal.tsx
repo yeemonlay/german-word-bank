@@ -18,6 +18,7 @@ export const AdjectiveFormModal: React.FC<AdjectiveFormModalProps> = ({
   const [german, setGerman] = useState(initialAdjective?.german || '');
   const [english, setEnglish] = useState(initialAdjective?.english || '');
   const [comparative, setComparative] = useState(initialAdjective?.comparative || '');
+  const [example, setExample] = useState(initialAdjective?.example || '');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,6 +40,7 @@ export const AdjectiveFormModal: React.FC<AdjectiveFormModalProps> = ({
         german: german.trim(),
         english: english.trim(),
         comparative: comparative.trim() || undefined,
+        example: example.trim() || undefined,
       });
       onClose();
     } catch (err) {
@@ -106,6 +108,27 @@ export const AdjectiveFormModal: React.FC<AdjectiveFormModalProps> = ({
             className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600"
           />
           <p className="text-xs text-slate-400 mt-1">Useful to note comparative & superlative forms.</p>
+        </div>
+
+        {/* Example Sentence */}
+        <div>
+          <label
+            htmlFor="adjective-example"
+            className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"
+          >
+            German Example <span className="text-slate-400 font-normal">(Optional)</span>
+          </label>
+          <textarea
+            id="adjective-example"
+            rows={2}
+            value={example}
+            onChange={(e) => setExample(e.target.value)}
+            placeholder="e.g. Der Zug ist sehr schnell."
+            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600"
+          />
+          <p className="text-xs text-slate-400 mt-1">
+            A short, simple German sentence using this adjective.
+          </p>
         </div>
 
         {/* Action Buttons */}

@@ -6,6 +6,7 @@ export interface Noun {
   german: string;
   plural: string;
   english: string;
+  example?: string; // Simple German example sentence
   createdAt?: number;
 }
 
@@ -14,6 +15,7 @@ export interface Verb {
   german: string; // Infinitive
   english: string;
   conjugation?: string; // Optional conjugations / forms, e.g. "nennt, nannte, hat genannt"
+  example?: string; // Simple German example sentence
   createdAt?: number;
 }
 
@@ -30,6 +32,7 @@ export interface Adjective {
   german: string;
   english: string;
   comparative?: string; // e.g. "schneller, am schnellsten" (optional)
+  example?: string; // Simple German example sentence
   createdAt?: number;
 }
 
@@ -67,8 +70,6 @@ export interface QuizSummary {
   percentage: number;
   records: QuizAnswerRecord[];
 }
-
-export type StorageMode = 'local' | 'firestore';
 
 export interface VocabularyStats {
   nounsCount: number;

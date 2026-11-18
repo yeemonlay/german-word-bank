@@ -30,7 +30,7 @@ import {
   updateSentence,
   deleteSentence,
 } from './services/vocabularyService';
-import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, CloudOff, RefreshCw } from 'lucide-react';
 
 interface ToastState {
   type: 'success' | 'error' | 'info';
@@ -40,6 +40,7 @@ interface ToastState {
 export function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
 
   // Data states
@@ -88,8 +89,11 @@ export function App() {
     window.location.hash = `#/${tab}`;
   };
 
-  // Load all data
-  const loadAllData = useCallback(async () => {
+  // Load all data from Firestore
+  const loadAllData = useCallback(async (showSpinner = false) => {
+    if (showSpinner) {
+      setIsLoading(true);
+    }
     try {
       const [n, v, a, s] = await Promise.all([
         fetchNouns(),
@@ -101,9 +105,13 @@ export function App() {
       setVerbs(v);
       setAdjectives(a);
       setSentences(s);
+      setLoadError(null);
     } catch (err) {
-      console.error('Error loading vocabulary:', err);
-      showToast('Error loading vocabulary data', 'error');
+      console.error('Error loading vocabulary from Firestore:', err);
+      setLoadError(
+        "We couldn't reach your vocabulary database right now. Please check your internet connection or try again in a moment."
+      );
+      showToast('Unable to reach vocabulary database', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -124,9 +132,15 @@ export function App() {
           setVerbs(v);
           setAdjectives(a);
           setSentences(s);
+          setLoadError(null);
         }
       } catch (err) {
         console.error('Error loading vocabulary on mount:', err);
+        if (isSubscribed) {
+          setLoadError(
+            "We couldn't reach your vocabulary database right now. Please check your internet connection or try again in a moment."
+          );
+        }
       } finally {
         if (isSubscribed) {
           setIsLoading(false);
@@ -379,6 +393,33 @@ export function App() {
           <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-3">
             <Loader2 className="w-8 h-8 text-red-600 animate-spin" />
             <span className="text-sm font-semibold text-slate-500">Loading German Word Bank...</span>
+          </div>
+        ) : loadError ? (
+          <div className="flex items-center justify-center min-h-[55vh] py-8">
+            <div
+              role="alert"
+              className="max-w-md w-full bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 text-center space-y-5"
+            >
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-red-50 text-red-600 border border-red-100 flex items-center justify-center">
+                <CloudOff className="w-7 h-7" />
+              </div>
+              <div className="space-y-2">
+                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                  Unable to Connect
+                </h1>
+                <p className="text-sm text-slate-600 leading-relaxed">{loadError}</p>
+              </div>
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => loadAllData(true)}
+                  className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-zinc-950 font-bold text-sm transition-colors shadow-xs cursor-pointer"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Try Again</span>
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
           <>

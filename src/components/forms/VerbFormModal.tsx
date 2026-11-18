@@ -18,6 +18,7 @@ export const VerbFormModal: React.FC<VerbFormModalProps> = ({
   const [german, setGerman] = useState(initialVerb?.german || '');
   const [english, setEnglish] = useState(initialVerb?.english || '');
   const [conjugation, setConjugation] = useState(initialVerb?.conjugation || '');
+  const [example, setExample] = useState(initialVerb?.example || '');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,6 +40,7 @@ export const VerbFormModal: React.FC<VerbFormModalProps> = ({
         german: german.trim(),
         english: english.trim(),
         conjugation: conjugation.trim() || undefined,
+        example: example.trim() || undefined,
       });
       onClose();
     } catch (err) {
@@ -106,6 +108,27 @@ export const VerbFormModal: React.FC<VerbFormModalProps> = ({
             className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600"
           />
           <p className="text-xs text-slate-400 mt-1">Useful to note 3rd person, Präteritum, or Perfekt.</p>
+        </div>
+
+        {/* Example Sentence */}
+        <div>
+          <label
+            htmlFor="verb-example"
+            className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1"
+          >
+            German Example <span className="text-slate-400 font-normal">(Optional)</span>
+          </label>
+          <textarea
+            id="verb-example"
+            rows={2}
+            value={example}
+            onChange={(e) => setExample(e.target.value)}
+            placeholder="e.g. Ich spreche ein bisschen Deutsch."
+            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600"
+          />
+          <p className="text-xs text-slate-400 mt-1">
+            A short, simple German sentence using this verb.
+          </p>
         </div>
 
         {/* Action Buttons */}
